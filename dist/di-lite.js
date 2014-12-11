@@ -54,7 +54,9 @@ di = {
         ctx.initialize = function () {
             for (var name in ctx.map) {
                 var entry = ctx.entry(name);
-                ctx.ready(ctx.inject(name, ctx.get(name), entry.dependencies()));
+                if (entry.strategy() === di.strategy.singleton) {
+                    ctx.get(name);
+                }
             }
         };
 
@@ -181,8 +183,10 @@ di = {
             return ctx.ready(ctx.inject(name, object, dependencies));
         },
         singleton: function (name, object, factory, type, args, ctx, dependencies) {
-            if (!object)
+            if (!object) {
                 object = factory(type, args);
+                object = ctx.ready(ctx.inject(name, object, dependencies));
+            }
 
             return object;
         }
@@ -205,7 +209,8 @@ di = {
             }
         }
     }
-};;di.utils = {};
+};
+;di.utils = {};
 
 di.utils.invokeStmt = function (args, op) {
     var exp = op ? op : "";
